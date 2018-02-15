@@ -1,0 +1,168 @@
+extends layout
+
+block body-content
+    script(type='text/javascript').
+        $.getJSON("/api/status", function(components) {
+        var temp;
+        //var oReq = new XMLHttpRequest();
+        //oReq.onload = reqListener;
+        //oReq.open("get", "hubs.json", true);
+        //oReq.send();
+
+        //function reqListener(e) {
+          //  temp = JSON.parse(this.responseText);
+        //}
+        $('table.service-table').empty();
+            var body = $('<tbody>');
+            $('table.service-table').append(body);
+        for (var component in components) {
+            var name = component;
+            //address=temp[name].ip;
+            var tempstatus = components[component][0];
+            var usercountval = components[component][1];
+            var row = $('<tr>').attr('class','service_innter_content')
+            body.append(row);
+            //var dynName = $('<tr>')
+            //body.append(dynName);
+            //var link = $('<a>').attr('href',"dchub://hdbits.tech")
+            var img = $('<img>').attr('id', 'status-' + name + '-icon');
+            var ico = $('<td>').addClass('icon').append(img);
+            row.append(ico);
+            var hubName = $('<td>').addClass('service');
+            var link = $('<a>').attr('href',"dchub://"+components[component][2]).text(name);
+            hubName.append(link);
+            var usercountdiv = $('<div>').attr('id', 'status-' + name +'-description');
+            var usercount = $('<font>').attr('id', 'description-' + name +'colour').attr('size',"1");
+            usercount.append(usercountdiv);
+            hubName.append(usercount);
+            row.append(hubName);
+            var stat = $('<td>').attr('id', 'status-' + name)
+            row.append(stat);
+
+            if(tempstatus == 1) {
+                $("#status-" + component).html("Online");
+                $("#status-" + component).css("color", "#77e177");
+                $("#status-" + component + "-icon").attr('src', "images/up.png?time=1444547002").attr('width', "38px");
+                $("#status-" + component+'-description').html("Connected Users: "+usercountval);
+                $("#description-" + name +'colour').attr('color',"#77e177");
+            } else if (tempstatus == 0) {
+                var downtime = Math.floor(usercountval/12);
+                downtime_days = Math.floor(downtime/(24*60));
+                downtime_hour = Math.floor((downtime/60)-(downtime_days*24));
+                downtime_minutes = Math.floor(downtime - (downtime_hour*60) - (downtime_days*24*60));
+                downtime_time = "";
+                if (downtime_days > 0){
+                    downtime_time = downtime_time + downtime_days + "d ";
+                    }
+                if (downtime_hour > 0){
+                    downtime_time = downtime_time + downtime_hour + "h ";
+                    }
+                if (downtime_minutes >= 0){
+                    downtime_time = downtime_time + downtime_minutes + "m ";
+                    }
+                $("#status-" + component).html("Offline");
+                $("#status-" + component).css("color", "#e17777");
+                $("#status-" + component + "-icon").attr('src', "images/down.png?time=1444547039").attr('width', "38px");
+                $("#status-" + component+'-description').html("Offline Since: "+downtime_time);
+                $("#description-" + name +'colour').attr('color',"#e17777");
+            } else if (tempstatus == 2) {
+                $("#status-" + component).html("Unstable");
+                $("#status-" + component).css("color", "#e1d377");
+                $("#status-" + component + "-icon").attr('src', "images/iffy.gif?time=1444637674").attr('width', "38px");
+                $("#status-" + component+'-description').html("Connectivity Issues");
+                $("#description-" + name +'colour').attr('color',"#e1d377");
+            } else {
+                $("#status-" + component).html("Updating...");
+                $("#status-" + component + "-icon").attr('src', "images/updating.gif?time=1444549150").attr('width', "38px");
+            }
+            if (name == "HD-BITS"){
+                $("#status-" + component).html("Coming Soon !");
+                $("#status-" + component).css("color", "#ff8000");
+                $("#status-" + component + "-icon").attr('src', "images/updating.gif?time=1444547002").attr('width', "38px");
+                $("#status-" + component+'-description').html("In Testing Phase");
+                $("#description-" + name +'colour').attr('color',"#ff8000");
+            }
+        }
+        });
+        $(document).ready(
+            function() {
+                setInterval(function() {
+                        $('<tbody>').fadeOut(1000);
+                        $.getJSON("/api/status", function(components) {
+                        for (var component in components) {
+                            var name = component;
+                            var tempstatus = components[component][0];
+                            var usercountval = components[component][1];
+                            if(tempstatus == 1) {
+                                $("#status-" + component).html("Online");
+                                $("#status-" + component).css("color", "#77e177");
+                                $("#status-" + component + "-icon").attr('src', "images/up.png?time=1444547002").attr('width', "38px");
+                                $("#status-" + component+'-description').html("Connected Users: "+usercountval);
+                                $("#description-" + name +'colour').attr('color',"#77e177");
+
+                            } else if (tempstatus == 0) {
+                                var downtime = Math.floor(usercountval/12);
+                                downtime_days = Math.floor(downtime/(24*60));
+                                downtime_hour = Math.floor((downtime/60)-(downtime_days*24));
+                                downtime_minutes = Math.floor(downtime - (downtime_hour*60) - (downtime_days*24*60));
+                                downtime_time = "";
+                                if (downtime_days > 0){
+                                    downtime_time = downtime_time + downtime_days + "d ";
+                                    }
+                                if (downtime_hour > 0){
+                                    downtime_time = downtime_time + downtime_hour + "h ";
+                                    }
+                                if (downtime_minutes >= 0){
+                                    downtime_time = downtime_time + downtime_minutes + "m ";
+                                    }
+                                $("#status-" + component).html("Offline");
+                                $("#status-" + component).css("color", "#e17777");
+                                $("#status-" + component + "-icon").attr('src', "images/down.png?time=1444547039").attr('width', "38px");
+                                $("#status-" + component+'-description').html("Offline Since: "+downtime_time);
+                                $("#description-" + name +'colour').attr('color',"#e17777");
+                            } else if (tempstatus == 2) {
+                                $("#status-" + component).html("Unstable");
+                                $("#status-" + component).css("color", "#e1d377");
+                                $("#status-" + component + "-icon").attr('src', "images/iffy.gif?time=1444637674").attr('width', "38px");
+                                $("#status-" + component+'-description').html("Connectivity Issues");
+                                $("#description-" + name +'colour').attr('color',"#e1d377");
+                            } else {
+                                $("#status-" + component).html("Updating...");
+                                $("#status-" + component + "-icon").attr('src', "images/updating.gif?time=1444549150").attr('width', "38px");
+                            }
+                        }
+                    });
+                }, 10000);
+        });
+
+    div#content
+        div.logo
+            img(src='#{logo_url}')
+        div.status-dashboard  
+            table.service-table
+                tr
+                    td.icon
+                        img(src, id='status-site-icon')
+                    td.service Collecting Data...
+                    td#status-site
+                //- tr
+                //-     td.icon
+                //-         img(src, id='status-tracker-icon')
+                //-     td.service Tracker - tracker.what.cd
+                //-     td#status-tracker
+                //- tr
+                //-     td.icon
+                //-         img(src, id='status-irc-icon')
+                //-     td.service IRC - irc.what-network.net
+                //-     td#status-irc
+
+    div.twitter
+        div.twitter_innter_content
+            a(class="twitter-timeline",href="https://twitter.com/pilanipirates",data-tweet-limit=2,data-theme="dark",data-chrome="noheader, nofooter, noborders, transparent",height="230")
+            script(async,src="//platform.twitter.com/widgets.js",charset="utf-8")
+
+    div.disclaimer
+        p This site is unofficial and is not affiliated to BITS Pilani.
+
+
+

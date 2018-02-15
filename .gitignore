@@ -1,0 +1,12 @@
+.DS_Store
+
+/node_modules/
+
+*.sublime-workspace
+
+*.sublime-project
+
+*.bak
+*.bak2
+*.key
+*.config

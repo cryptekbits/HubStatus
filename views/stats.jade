@@ -1,0 +1,198 @@
+extends layout
+block body-content
+    //script(type='text/javascript',src="//cdn.plot.ly/plotly-latest.min.js",charset="utf-8")
+    script(type='text/javascript',src="/javascript/plotly-latest.min.js",charset="utf-8")
+    //script(type='text/javascript',src="/javascript/figure.js",charset="utf-8")
+    script(type='text/javascript').
+        $.getJSON("/api/uptime", function(components) {
+            var list = $('.stats-list.uptime');
+            list.empty();
+            data_color={
+              "HD-BITS":"#ffffff",
+              "DeZire":"#003366",
+              "Nebula":"#00ff00",
+              "Jhanjhatless":"#ff9c00",
+              "Hell":"#bf00ff"
+            }
+            var i=1;
+            for (var component in components) {
+                var name = component;
+                temp_uptime = Math.floor(components[component]/12);
+                temp_days = Math.floor(temp_uptime/(24*60));
+                temp_hour = Math.floor((temp_uptime/60)-(temp_days*24));
+                temp_minutes = Math.floor(temp_uptime - (temp_hour*60) - (temp_days*24*60));
+                table_time = "";
+                var offset = Math.pow(-1,i);
+                i++;
+                if (offset == -1){
+                    myvar = "a";
+                    };
+                if (offset == 1){
+                    myvar = "b";
+                    };
+                if (temp_days > 0){
+                    table_time = table_time + temp_days + "d ";
+                    }
+                if (temp_hour > 0){
+                    table_time = table_time + temp_hour + "h ";
+                    }
+                if (temp_minutes > 0){
+                    table_time = table_time + temp_minutes + "m ";
+                    }
+                var el = $('<li>').attr('id', name).attr('class',myvar).text(name).append($('<span>').attr('id', 'stats-uptime-' + name));
+                list.append(el);
+                //$("#stats-uptime-" + component).html(components[component] + "m" + " (" + Math.floor(components[component]/(24*60)) +" days)").append($('<font>').attr('color',data_color[name]).text('|'));
+                $("#stats-uptime-" + component).html(table_time).append($('<font>').attr('color',data_color[name]).text('|'));
+            }
+        });
+
+        $.getJSON("/api/records", function(components) {
+            var list = $('.stats-list.record');
+            list.empty();
+            var i=1;
+            for (var component in components) {
+                var name = component;          
+                temp_rec_uptime = Math.floor(components[component]/12);
+                temp_rec_days = Math.floor(temp_rec_uptime/(24*60));
+                temp_rec_hour = Math.floor((temp_rec_uptime/60)-(temp_rec_days*24));
+                temp_rec_minutes = Math.floor(temp_rec_uptime - (temp_rec_hour*60) - (temp_rec_days*24*60));
+                table_rec_time = "";
+                var offset = Math.pow(-1,i);
+                i++;
+                if (offset == -1){
+                    myvar = "a";
+                    };
+                if (offset == 1){
+                    myvar = "b";
+                    };
+                if (temp_rec_days > 0){
+                    table_rec_time = table_rec_time + temp_rec_days + "d ";
+                    }
+                if (temp_rec_hour > 0){
+                    table_rec_time = table_rec_time + temp_rec_hour + "h ";
+                    }
+                if (temp_rec_minutes > 0){
+                    table_rec_time = table_rec_time + temp_rec_minutes + "m ";
+                    }      
+                var el = $('<li>').attr('class',myvar).text(name).append($('<span>').attr('id', 'stats-uptimerecord-' + name));
+                list.append(el);
+                //$("#stats-uptimerecord-" + component).html(components[component] + "m" + " (" + Math.floor(components[component]/(24*60)) +" days)");
+                $("#stats-uptimerecord-" + component).html(table_rec_time);
+            }
+        });
+
+    div#content
+        div.logo
+            a(href="/")
+                img(src='images/logos/logo.png')
+        h3 Current Uptime
+        ul.stats-list.uptime
+        h3 Best Uptime
+        ul.stats-list.record
+    div.graphdiv#myDiv
+    script(type='text/javascript').
+        $.getJSON("/api/hourstat", function(components) {
+            /*var gd = document.getElementById('e90a5b82-216a-4ca8-9890-3e7be3b54bf9')*/
+            //var resizeDebounce = null;
+            var data_local = [];
+            /*function resizePlot() {
+                var bb = gd.getBoundingClientRect();
+                Plotly.relayout(gd, {
+                    width: bb.width,
+                    height: bb.height
+                });
+            }*/
+            data_color={
+              "HD-BITS":"#ffffff",
+              "DeZire":"#003366",
+              "Nebula":"#00ff00",
+              "Jhanjhatless":"#ff9c00",
+              "Hell":"#bf00ff"
+            }
+            for (var component in components) {
+                array = components[component];
+                var temp = {
+                    opacity: 1,
+                    name: component,
+                    x:["24","23","22","21","20","19","18","17","16","15","14","13","12","11","10","9","8","7","6","5","4","3","2","1"],
+                    y:array,
+                    mode: 'lines',
+                    line: {
+                        color: data_color[component],
+                        shape: 'spline',
+                        smoothing:10,
+                        width: 1
+                    }
+                };
+                data_local.push(temp);
+            }
+            var layout = {
+                "showlegend": false,
+                "margin":{
+                  "b":30,
+                  "l":50,
+                  "r":20,
+                  "t":10
+                },
+                "yaxis": {
+                    "ticklen": 0,
+                    "ticksuffix":" ",
+                    //"tickwidth": 0,
+                    "showgrid":true,
+                    "zeroline": true,
+                    "gridcolor": "rgb(50, 50, 50)",
+                    "tickmode": "linear", 
+                    "title": "Minutes Online", 
+                    //"tick0": 0,
+                    "ticks": "outside", 
+                    "dtick": 10,
+                    "range": [
+                        -3.3333333333333335, 
+                        63.333333333333336
+                    ], 
+                    "titlefont": {
+                        "size": 11
+                    }, 
+                    "tickcolor": "#000", 
+                    //"showline": false,
+                    "type": "linear"
+                }, 
+                "paper_bgcolor":'rgba(0,0,0,0.4)',
+                "plot_bgcolor":'rgba(0,0,0,0.4)',
+                "breakpoints": [], 
+                "xaxis": {
+                    "color": "rgb(0,0,0)",
+                    //"ticklen": 24,
+                    //"tickwidth": 4,
+                    "tickmode": "array",
+                    "title": "<br>", 
+                    "tick0": 2,
+                    "tickfont": {
+                      "color":"rgb(120,120,120)",
+                      "size":12,
+                      "family":"Balto"
+                    },
+                    "tickvals":[24,1],
+                    "ticktext":["24 hours ago","Now"],
+                    "ticks": "inside", 
+                    //"gridwidth": 5,
+                    "dtick": 24,
+                    "showgrid": true,
+                    "range":[24,0],
+                    //"gridcolor": "rgb(200, 200, 200)", 
+                    "ticksuffix": " Hours Ago",
+                    "showticksuffix":"first",
+                    "tickcolor": "#222",
+                    //"zeroline": true, 
+                    //"showline": false, 
+                    "nticks": 24, 
+                    "type": "linear", 
+                    "autorange": true
+                }, 
+                "images": [],
+                "hovermode": "compare"
+            };
+            Plotly.newPlot('myDiv', data_local, layout,{displayModeBar: false});
+            
+        });
+
